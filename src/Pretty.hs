@@ -1,8 +1,5 @@
 module Pretty where
 
-import           Data.Either
-import           Data.List
-
 import           Syntax
 
 pretty :: Expr -> String
