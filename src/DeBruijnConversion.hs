@@ -23,6 +23,7 @@ debruijnConvert = debruijnIndex []
 |-}
 debruijnIndex :: [String] -> Expr -> Expr
 debruijnIndex nameStack e = case e of
-  (Var name) -> Var (show $ fromMaybe (-1) (elemIndex name nameStack))
+  (Var name     ) -> Var (show $ fromMaybe (-1) (elemIndex name nameStack))
   (App e1 e2) -> App (debruijnIndex nameStack e1) (debruijnIndex nameStack e2)
   (Lam name expr) -> Lam "" (debruijnIndex (name : nameStack) expr)
+  (Lit l        ) -> Lit l
