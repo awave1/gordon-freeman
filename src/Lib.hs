@@ -1,14 +1,15 @@
-{-# LANGUAGE OverloadedStrings #-}
 module Lib where
 
 import           System.Environment
 
+import           Data.Either
 import qualified Data.Text                     as T
 import qualified Data.Text.IO                  as T
 
 
 import           Parser
 import           Pretty
+import           DeBruijnConversion
 
 {-
     - Turning (extended) lambda terms into De Bruijn notation
@@ -43,13 +44,10 @@ eval (EApp fun arg) = case eval fun of
     other -> EApp other arg
 eval x = x
 
-pprint :: String -> T.Text
-pprint fun = case parseExpr fun of
-    Right exp -> T.pack $ pretty exp
-    Left  _   -> T.pack "error"
-
 someFunc :: IO ()
 someFunc = do
     args <- getArgs
     let fun = head args
-    T.putStrLn $ pprint fun
+    case parseExpr fun of
+        Right parsed -> (T.putStrLn . T.pack . pretty) (debruijnConvert parsed)
+        Left  err    -> print err
