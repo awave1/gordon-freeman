@@ -11,7 +11,7 @@ import           Syntax
 {-|
   Perform De Bruijn conversion
 |-}
-debruijnConvert :: Expr -> Expr
+debruijnConvert :: Lambda -> DeBruijnLambda
 debruijnConvert = debruijnIndex []
 
 {-|
@@ -21,9 +21,9 @@ debruijnConvert = debruijnIndex []
 
   TODO: Replace defaulting to -1 with "Either" structure
 |-}
-debruijnIndex :: [String] -> Expr -> Expr
+debruijnIndex :: [String] -> Lambda -> DeBruijnLambda
 debruijnIndex nameStack e = case e of
-  (Var name     ) -> Var (show $ fromMaybe (-1) (elemIndex name nameStack))
-  (App e1 e2) -> App (debruijnIndex nameStack e1) (debruijnIndex nameStack e2)
-  (Lam name expr) -> Lam "" (debruijnIndex (name : nameStack) expr)
-  (Lit l        ) -> Lit l
+  (Var name     ) -> DVar (fromMaybe (-1) (elemIndex name nameStack))
+  (App e1 e2) -> DApp (debruijnIndex nameStack e1) (debruijnIndex nameStack e2)
+  (Abs name expr) -> DAbs (debruijnIndex (name : nameStack) expr)
+  (Literal l    ) -> DLiteral l

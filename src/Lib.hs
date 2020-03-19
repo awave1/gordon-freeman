@@ -49,5 +49,8 @@ someFunc = do
     args <- getArgs
     let fun = head args
     case parseExpr fun of
-        Right parsed -> (T.putStrLn . T.pack . pretty) (debruijnConvert parsed)
-        Left  err    -> print err
+        Right parsed -> do
+            putStrLn $ "original: " ++ pretty parsed
+            putStr "De Bruijn: "
+            (T.putStrLn . T.pack . prettyDeBruijn) (debruijnConvert parsed)
+        Left err -> print err

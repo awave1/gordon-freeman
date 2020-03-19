@@ -44,28 +44,28 @@ contents parser = do
 natural :: Parser Integer
 natural = Token.natural lexer
 
-variable :: Parser Expr
+variable :: Parser Lambda
 variable = Var <$> identifier
 
-number :: Parser Expr
-number = Lit . LInt . fromIntegral <$> natural
+number :: Parser Lambda
+number = Literal . LInt . fromIntegral <$> natural
 
-lambda :: Parser Expr
+lambda :: Parser Lambda
 lambda = do
   reservedOp "\\"
   args <- many1 identifier
   reservedOp "."
   body <- expr
-  return $ foldr Lam body args
+  return $ foldr Abs body args
 
 
-term :: Parser Expr
+term :: Parser Lambda
 term = parens expr <|> variable <|> number <|> lambda
 
-expr :: Parser Expr
+expr :: Parser Lambda
 expr = do
   es <- many1 term
   return $ foldl1 App es
 
-parseExpr :: String -> Either ParseError Expr
+parseExpr :: String -> Either ParseError Lambda
 parseExpr = parse (contents expr) "<stdin>"
