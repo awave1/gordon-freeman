@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 316fff92b2193f4788cc9bfb4e383e94c2cb612aee28c69f2e2dfa582e898970
+-- hash: 498cc44f30c9df18e0ab5b245ebae5f1bdebcf7b23a111c5d8bd753c901e51d3
 
 name:           gordon-freeman
 version:        0.1.0.0
@@ -31,8 +31,8 @@ library
       Lib
       Parser
       Pretty
+      SECD
       Syntax
-      TutAssignment
   other-modules:
       Paths_gordon_freeman
   hs-source-dirs:

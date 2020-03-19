@@ -58,7 +58,6 @@ lambda = do
   body <- expr
   return $ foldr Abs body args
 
-
 term :: Parser Lambda
 term = parens expr <|> variable <|> number <|> lambda
 

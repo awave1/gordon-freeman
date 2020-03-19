@@ -10,6 +10,7 @@ import qualified Data.Text.IO                  as T
 import           Parser
 import           Pretty
 import           DeBruijnConversion
+import qualified Syntax                        as S
 
 {-
     - Turning (extended) lambda terms into De Bruijn notation
@@ -47,10 +48,19 @@ eval x = x
 someFunc :: IO ()
 someFunc = do
     args <- getArgs
-    let fun = head args
-    case parseExpr fun of
-        Right parsed -> do
-            putStrLn $ "original: " ++ pretty parsed
-            putStr "De Bruijn: "
-            (T.putStrLn . T.pack . prettyDeBruijn) (debruijnConvert parsed)
-        Left err -> print err
+    let e = S.Abs "x" (S.Abs "y" (S.Add (S.Var "x") (S.Var "y")))
+    print e
+    putStrLn ""
+    putStrLn $ "original: " ++ pretty e
+    putStr "De Bruijn: "
+    (T.putStrLn . T.pack . prettyDeBruijn) (debruijnConvert e)
+
+    -- let fun = head args
+    -- case parseExpr fun of
+    --     Right parsed -> do
+    --         print parsed
+    --         let e = S.Abs "x" (S.Abs "y" (S.Add (S.Var "x") (S.Var "y")))
+    --         putStrLn $ "original: " ++ pretty e
+    --         putStr "De Bruijn: "
+    --         (T.putStrLn . T.pack . prettyDeBruijn) (debruijnConvert e)
+    --     Left err -> print err
