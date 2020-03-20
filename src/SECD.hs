@@ -40,7 +40,7 @@ compile expr = case expr of
     compile cond ++ [CASE (compile c1 ++ [RET], compile c2 ++ [RET])]
   DNil          -> [NIL]
   (DCons e1 e2) -> compile e2 ++ compile e1 ++ [CONS]
-  (DApp  e1 e2) -> code e1 e2 APP
+  (DApp  e1 e2) -> code e2 e1 APP
   (DAbs term  ) -> [CLO (compile term ++ [RET])]
   _             -> undefined
  where
@@ -50,7 +50,8 @@ compile expr = case expr of
     (LBool b) -> if b then [TRUE] else [FALSE]
 
 -- -- a function that does one step
--- step :: SECDMachine -> SECDMachine
+step :: SECDMachine -> SECDMachine
+step = undefined
 -- -- fill in this table
 -- -- note: some type issues here, idk why
 -- step ((CLO c) : prog, env, stack) = (c, env, CLO ((c, env) : stack))
