@@ -23,9 +23,11 @@ debruijnConvert = debruijnIndex []
 |-}
 debruijnIndex :: [String] -> Lambda -> DeBruijnLambda
 debruijnIndex nameStack e = case e of
-  (Var     name) -> DVar (fromMaybe (-1) (elemIndex name nameStack))
-  (Literal l   ) -> DLiteral l
-  Nil            -> DNil
+  (Var name) -> case elemIndex name nameStack of
+    Just n  -> DVar n
+    Nothing -> undefined
+  (Literal l) -> DLiteral l
+  Nil         -> DNil
   (Cons el1 el2) ->
     DCons (debruijnIndex nameStack el1) (debruijnIndex nameStack el2)
   (App e1 e2) -> DApp (debruijnIndex nameStack e1) (debruijnIndex nameStack e2)

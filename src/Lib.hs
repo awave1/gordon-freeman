@@ -38,42 +38,41 @@ runAll (e : exps) = do
 
     runAll exps
 
+run' :: [String] -> IO ()
+run' args
+    | not $ null args = do
+        let fun = head args
+        case parseExpr fun of
+            Right parsed -> runAll [parsed]
+            Left  err    -> print err
+    | otherwise = do
+        let add = S.App
+                (S.Abs "x" (S.Add (S.Var "x") (S.Literal (S.LInt 1))))
+                (S.Literal (S.LInt 2))
+
+        let cond = S.App
+                (S.If (S.LEq (S.Literal (S.LInt 1)) (S.Literal (S.LInt 1)))
+                      (S.Abs "x" (S.Add (S.Var "x") (S.Literal (S.LInt 1))))
+                      (S.Abs "x" (S.Add (S.Var "x") (S.Literal (S.LInt 2))))
+                )
+                (S.Literal (S.LInt 2))
+
+        let case' = S.App
+                (S.Abs
+                    "x"
+                    (S.Case (S.Var "x")
+                            (S.Add (S.Var "x") (S.Literal (S.LInt 1)))
+                            (S.Add (S.Var "x") (S.Literal (S.LInt 2)))
+                    )
+                )
+                (S.Cons (S.Literal (S.LInt 2)) S.Nil)
+
+        let o = S.Abs "x" (S.App (S.Var "x") (S.Var "x"))
+        let omega = S.App o o
+
+        runAll [add, cond, case', omega]
+
 runSECD :: IO ()
 runSECD = do
     args <- getArgs
-
-    let add = S.App (S.Abs "x" (S.Add (S.Var "x") (S.Literal (S.LInt 1))))
-                    (S.Literal (S.LInt 2))
-
-    let cond = S.App
-            (S.If (S.LEq (S.Literal (S.LInt 1)) (S.Literal (S.LInt 1)))
-                  (S.Abs "x" (S.Add (S.Var "x") (S.Literal (S.LInt 1))))
-                  (S.Abs "x" (S.Add (S.Var "x") (S.Literal (S.LInt 2))))
-            )
-            (S.Literal (S.LInt 2))
-
-    let case' = S.App
-            (S.Abs
-                "x"
-                (S.Case (S.Var "x")
-                        (S.Add (S.Var "x") (S.Literal (S.LInt 1)))
-                        (S.Add (S.Var "x") (S.Literal (S.LInt 2)))
-                )
-            )
-            (S.Cons (S.Literal (S.LInt 2)) S.Nil)
-
-    let o = S.Abs "x" (S.App (S.Var "x") (S.Var "x"))
-    let omega = S.App o o
-
-    runAll [add, cond, case', omega]
-
-    -- let fun = head args
-    -- case parseExpr fun of
-    --     Right parsed -> do
-    --         print parsed
-    --         let e = S.Abs "x" (S.Abs "y" (S.Add (S.Var "x") (S.Var "y")))
-    --         putStrLn $ "original: " ++ pretty parsed
-    --         putStr "De Bruijn: "
-    --         let deBruijn = debruijnConvert parsed
-    --         (T.putStrLn . T.pack . prettyDeBruijn) (debruijnConvert e)
-    --     Left err -> print err
+    run' args
