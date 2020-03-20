@@ -1,4 +1,7 @@
-module Lib where
+module Lib
+    ( runSECD
+    )
+where
 
 import           System.Environment
 
@@ -20,8 +23,23 @@ import           SECD
     - Writing five example programs (including some recursive ones! e.g factorial) in the extended lambda calculus.
 -}
 
-someFunc :: IO ()
-someFunc = do
+runAll :: [S.Lambda] -> IO ()
+runAll []         = putStrLn "done!"
+runAll (e : exps) = do
+    print e
+    putStrLn $ "original: " ++ pretty e
+    putStr "De Bruijn: "
+    let deBruijn = debruijnConvert e
+    (T.putStrLn . T.pack . prettyDeBruijn) deBruijn
+    let secdCode = compile deBruijn
+    putStr "SECD: "
+    print secdCode
+    putStrLn "----------------------------"
+
+    runAll exps
+
+runSECD :: IO ()
+runSECD = do
     args <- getArgs
 
     let add = S.App (S.Abs "x" (S.Add (S.Var "x") (S.Literal (S.LInt 1))))
@@ -44,18 +62,10 @@ someFunc = do
             )
             (S.Cons (S.Literal (S.LInt 2)) S.Nil)
 
-    print add
-    print cond
-    print case'
+    let o = S.Abs "x" (S.App (S.Var "x") (S.Var "x"))
+    let omega = S.App o o
 
-    putStrLn ""
-    putStrLn $ "original: " ++ pretty case'
-    putStr "De Bruijn: "
-    let deBruijn = debruijnConvert case'
-    (T.putStrLn . T.pack . prettyDeBruijn) deBruijn
-    let secdCode = compile deBruijn
-    putStr "SECD: "
-    print secdCode
+    runAll [add, cond, case', omega]
 
     -- let fun = head args
     -- case parseExpr fun of
