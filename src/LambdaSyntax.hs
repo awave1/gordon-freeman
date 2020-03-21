@@ -1,4 +1,4 @@
-module Syntax where
+module LambdaSyntax where
 
 type Name = String
 

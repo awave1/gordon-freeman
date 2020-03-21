@@ -13,7 +13,7 @@ import qualified Data.Text.IO                  as T
 import           Parser
 import           Pretty
 import           DeBruijnConversion
-import qualified Syntax                        as S
+import qualified LambdaSyntax                  as S
 import           SECD
 
 {-
@@ -34,6 +34,8 @@ runAll (e : exps) = do
     let secdCode = compile deBruijn
     putStr "SECD: "
     print secdCode
+    putStrLn "Computed SEDC:"
+    print $ compute secdCode
     putStrLn "----------------------------"
 
     runAll exps
@@ -51,7 +53,7 @@ run' args
                 (S.Literal (S.LInt 2))
 
         let cond = S.App
-                (S.If (S.LEq (S.Literal (S.LInt 1)) (S.Literal (S.LInt 1)))
+                (S.If (S.LEq (S.Literal (S.LInt 1)) (S.Literal (S.LInt 2)))
                       (S.Abs "x" (S.Add (S.Var "x") (S.Literal (S.LInt 1))))
                       (S.Abs "x" (S.Add (S.Var "x") (S.Literal (S.LInt 2))))
                 )
@@ -67,10 +69,12 @@ run' args
                 )
                 (S.Cons (S.Literal (S.LInt 2)) S.Nil)
 
+        -- it's possible to run the omega,
+        -- but as you'd expect, it'll run indefinetly
         let o = S.Abs "x" (S.App (S.Var "x") (S.Var "x"))
         let omega = S.App o o
 
-        runAll [add, cond, case', omega]
+        runAll [add, cond, case']
 
 runSECD :: IO ()
 runSECD = do

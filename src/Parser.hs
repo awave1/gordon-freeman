@@ -10,7 +10,7 @@ import           Text.Parsec.Language           ( haskellStyle )
 import qualified Text.Parsec.Expr              as Ex
 import qualified Text.Parsec.Token             as Token
 
-import           Syntax
+import           LambdaSyntax
 
 lexer :: Token.TokenParser ()
 lexer = Token.makeTokenParser style

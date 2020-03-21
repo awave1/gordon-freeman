@@ -1,6 +1,10 @@
-module SECD where
+module SECD
+  ( compile
+  , compute
+  )
+where
 
-import           Syntax
+import           LambdaSyntax
 
 type Prog = [SECDInstruction]
 type Env = [Int]
@@ -21,11 +25,12 @@ data SECDInstruction
   | NIL -- push Nil constant on the stack
   | CASE (Prog, Prog) -- if Cons t1 t2 is on the stack, pop it and push t2 and t1 on the environment, evaluate c2
               -- if nil, pop it and evaluate c1
-  | CLOS [SECDInstruction] [Int] -- closure operation? (which is what supposed to go on the stack?)
+  | CLOS Prog Prog -- closure operation? (which is what supposed to go on the stack?)
+  | CCONS (SECDInstruction, SECDInstruction)
   deriving (Show, Eq)
 
 -- code, env, stack
-type SECDMachine = (Prog, Env, Prog)
+type SECDMachine = (Prog, Prog, Prog)
 
 compile :: DeBruijnLambda -> Prog
 compile expr = case expr of
@@ -49,12 +54,36 @@ compile expr = case expr of
     (LInt  i) -> [CONST i]
     (LBool b) -> if b then [TRUE] else [FALSE]
 
+compute :: Prog -> SECDMachine
+compute code = compute' (code, [], [])
+ where
+  compute' (code, env, stack) | null code && null env = (code, env, stack)
+                              | otherwise = compute' $ step (code, env, stack)
+
+
 -- -- a function that does one step
 step :: SECDMachine -> SECDMachine
-step = undefined
--- -- fill in this table
--- -- note: some type issues here, idk why
--- step ((CLO c) : prog, env, stack) = (c, env, CLO ((c, env) : stack))
-
--- -- fixPoint :: (Eq a) => (a -> a) -> a -> a
--- -- fixPoint f x = if (x == ) -- ?
+step machine = case machine of
+  (ACCESS n : code, env, stack) -> (code, env, env !! n : stack)
+  (CLO    c : code, env, stack) -> (code, env, CLOS c env : stack)
+  (APP : code, env, CLOS closCode closEnv : var : stack) ->
+    (closCode, var : closEnv, CLOS code env : stack)
+  (RET : code, env, retOp : CLOS closCode closeEnv : stack) ->
+    (closCode, closeEnv, retOp : stack)
+  (CONST c : code, env, stack) -> (code, env, CONST c : stack)
+  (TRUE    : code, env, stack) -> (code, env, TRUE : stack)
+  (FALSE   : code, env, stack) -> (code, env, FALSE : stack)
+  (ADD : code, env, CONST i : CONST j : stack) ->
+    (code, env, CONST (i + j) : stack)
+  (MUL : code, env, CONST i : CONST j : stack) ->
+    (code, env, CONST (i * j) : stack)
+  (LEQ : code, env, CONST i : CONST j : stack) ->
+    (code, env, (if i <= j then TRUE else FALSE) : stack)
+  (IF (e1, e2) : code, env, TRUE : stack ) -> (e1, env, CLOS code env : stack)
+  (IF (e1, e2) : code, env, FALSE : stack) -> (e2, env, CLOS code env : stack)
+  (NIL         : code, env, stack        ) -> (code, env, NIL : stack)
+  (CONS : code, env, el1 : el2 : stack) ->
+    (code, env, CCONS (el1, el2) : stack)
+  (CASE (e1, e2) : code, env, CCONS (el1, el2) : stack) ->
+    (e1, el1 : el2 : env, CLOS code env : stack)
+  (CASE (e1, e2) : code, env, NIL : stack) -> (e2, env, CLOS code env : stack)

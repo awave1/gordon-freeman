@@ -4,7 +4,7 @@ module Pretty
   )
 where
 
-import           Syntax
+import           LambdaSyntax
 
 pretty :: Lambda -> String
 pretty expr = case expr of
@@ -17,14 +17,15 @@ pretty expr = case expr of
   (Mul  expr1 expr2) -> printExpr pretty expr1 expr2 " * "
   (LEq  expr1 expr2) -> printExpr pretty expr1 expr2 " <= "
   (If cond ifExpr elseExpr) ->
-    "if ("
+    "(if ("
       ++ pretty cond
       ++ ") then "
       ++ pretty ifExpr
       ++ " else "
       ++ pretty elseExpr
+      ++ ")"
   (Case cond c1 c2) ->
-    "case " ++ pretty cond ++ ": " ++ pretty c1 ++ " or " ++ pretty c2
+    "(case " ++ pretty cond ++ ": " ++ pretty c1 ++ " or " ++ pretty c2 ++ ")"
 
   (Abs name expr) -> "(" ++ "λ" ++ name ++ "." ++ pretty expr ++ ")"
 
@@ -40,19 +41,21 @@ prettyDeBruijn expr = case expr of
   (DMul expr1 expr2) -> printExpr prettyDeBruijn expr1 expr2 " * "
   (DLEq expr1 expr2) -> printExpr prettyDeBruijn expr1 expr2 " <= "
   (DIf cond ifExpr elseExpr) ->
-    "if ("
+    "(if ("
       ++ prettyDeBruijn cond
       ++ ") then "
       ++ prettyDeBruijn ifExpr
       ++ " else "
       ++ prettyDeBruijn elseExpr
+      ++ ")"
   (DCase cond c1 c2) ->
-    "case "
+    "(case "
       ++ prettyDeBruijn cond
       ++ ": "
       ++ prettyDeBruijn c1
       ++ " or "
       ++ prettyDeBruijn c2
+      ++ ")"
   (DAbs expr) -> "(" ++ "λ" ++ "." ++ prettyDeBruijn expr ++ ")"
 
 printExpr :: (a -> String) -> a -> a -> String -> String

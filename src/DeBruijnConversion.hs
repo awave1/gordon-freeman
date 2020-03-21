@@ -6,7 +6,7 @@ where
 import           Data.List
 import           Data.Maybe
 
-import           Syntax
+import           LambdaSyntax
 
 {-|
   Perform De Bruijn conversion
