@@ -40,4 +40,5 @@ debruijnIndex nameStack e = case e of
   (Case cond ifExp elseExp) -> DCase (debruijnIndex nameStack cond)
                                      (debruijnIndex nameStack ifExp)
                                      (debruijnIndex nameStack elseExp)
-  (Abs name expr) -> DAbs (debruijnIndex (name : nameStack) expr)
+  (Abs name expr      ) -> DAbs (debruijnIndex (name : nameStack) expr)
+  (Fix (Abs name expr)) -> DFix (debruijnIndex (name : nameStack) expr)

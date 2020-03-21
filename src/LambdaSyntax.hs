@@ -14,6 +14,7 @@ data Lambda
   | Cons Lambda Lambda
   | If Lambda Lambda Lambda -- main control flow, if
   | Case Lambda Lambda Lambda
+  | Fix Lambda
   deriving (Show, Eq)
 
 data DeBruijnLambda
@@ -29,6 +30,7 @@ data DeBruijnLambda
   | DCons DeBruijnLambda DeBruijnLambda
   | DIf DeBruijnLambda DeBruijnLambda DeBruijnLambda -- main control flow, if
   | DCase DeBruijnLambda DeBruijnLambda DeBruijnLambda
+  | DFix DeBruijnLambda
   deriving (Show, Eq)
 
 data Literal
