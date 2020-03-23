@@ -19,6 +19,7 @@ pretty expr = case expr of
   (Add  expr1 expr2) -> printExpr pretty expr1 expr2 " + "
   (Mul  expr1 expr2) -> printExpr pretty expr1 expr2 " * "
   (LEq  expr1 expr2) -> printExpr pretty expr1 expr2 " <= "
+  (GEq  expr1 expr2) -> printExpr pretty expr1 expr2 " >= "
   (If cond ifExpr elseExpr) ->
     "(if ("
       ++ pretty cond
@@ -46,6 +47,7 @@ prettyDeBruijn expr = case expr of
   (DAdd expr1 expr2) -> printExpr prettyDeBruijn expr1 expr2 " + "
   (DMul expr1 expr2) -> printExpr prettyDeBruijn expr1 expr2 " * "
   (DLEq expr1 expr2) -> printExpr prettyDeBruijn expr1 expr2 " <= "
+  (DGEq expr1 expr2) -> printExpr prettyDeBruijn expr1 expr2 " >= "
   (DIf cond ifExpr elseExpr) ->
     "(if ("
       ++ prettyDeBruijn cond

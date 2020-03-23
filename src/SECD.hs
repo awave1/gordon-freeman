@@ -19,7 +19,8 @@ data SECDInstruction
   | CONST Int -- constant int val
   | ADD -- pop two args from the top of the stack and add them
   | MUL -- pop two args from the top of the stack and mul them
-  | LEQ -- pop two args from the top of the stack and compare them
+  | LEQ -- pop two args from the top of the stack and compare them (<=)
+  | GEQ -- pop two args from the top of the stack and compare them (>=)
   | TRUE -- push True on the stack
   | FALSE -- push False on the stack
   | IF (Prog, Prog) -- pop an argument from the top of the stack and whether it it's True or False, evaluate the branh
@@ -46,6 +47,7 @@ compile expr = case expr of
   (DAdd e1 e2  ) -> code e2 e1 ADD
   (DMul e1 e2  ) -> code e2 e1 MUL
   (DLEq e1 e2  ) -> code e2 e1 LEQ
+  (DGEq e1 e2  ) -> code e2 e1 GEQ
   (DIf cond ifExp elseExp) ->
     compile cond ++ [IF (compile ifExp ++ [RET], compile elseExp ++ [RET])]
   (DCase cond c1 c2) ->
@@ -102,6 +104,9 @@ step machine = case machine of
 
   (LEQ : code, env, CONST i : CONST j : stack) ->
     (code, env, (if i <= j then TRUE else FALSE) : stack)
+
+  (GEQ : code, env, CONST i : CONST j : stack) ->
+    (code, env, (if i >= j then TRUE else FALSE) : stack)
 
   (IF (e1, e2) : code, env, TRUE : stack ) -> (e1, env, CLOS code env : stack)
 

@@ -13,6 +13,7 @@ data Lambda
   | Add Lambda Lambda
   | Mul Lambda Lambda
   | LEq Lambda Lambda
+  | GEq Lambda Lambda
   | Nil
   | Cons Lambda Lambda
   | If Lambda Lambda Lambda -- main control flow, if
@@ -32,6 +33,7 @@ data DeBruijnLambda
   | DSub DeBruijnLambda DeBruijnLambda
   | DMul DeBruijnLambda DeBruijnLambda
   | DLEq DeBruijnLambda DeBruijnLambda
+  | DGEq DeBruijnLambda DeBruijnLambda
   | DNil
   | DCons DeBruijnLambda DeBruijnLambda
   | DIf DeBruijnLambda DeBruijnLambda DeBruijnLambda -- main control flow, if

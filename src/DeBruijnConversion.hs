@@ -32,6 +32,7 @@ debruijnIndex nameStack e = case e of
   (Add e1 e2) -> DAdd (debruijnIndex nameStack e1) (debruijnIndex nameStack e2)
   (Mul e1 e2) -> DMul (debruijnIndex nameStack e1) (debruijnIndex nameStack e2)
   (LEq e1 e2) -> DLEq (debruijnIndex nameStack e1) (debruijnIndex nameStack e2)
+  (GEq e1 e2) -> DGEq (debruijnIndex nameStack e1) (debruijnIndex nameStack e2)
   (If cond ifExp elseExp) -> DIf (debruijnIndex nameStack cond)
                                  (debruijnIndex nameStack ifExp)
                                  (debruijnIndex nameStack elseExp)

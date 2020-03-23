@@ -76,7 +76,7 @@ runSECD = do
                         (S.Var "f")
                         (S.Abs
                             "x"
-                            (S.App (S.App (S.Var "a") (S.Var "a")) (S.Var "s"))
+                            (S.App (S.App (S.Var "a") (S.Var "a")) (S.Var "x"))
                         )
                     )
                 )
@@ -86,11 +86,30 @@ runSECD = do
                         (S.Var "f")
                         (S.Abs
                             "x"
-                            (S.App (S.App (S.Var "a") (S.Var "a")) (S.Var "s"))
+                            (S.App (S.App (S.Var "a") (S.Var "a")) (S.Var "x"))
                         )
                     )
                 )
             )
 
+    let
+        factorial = S.Abs
+            "f"
+            (S.Abs
+                "n"
+                (S.If
+                    (S.GEq (S.Var "n") (S.Literal (S.LInt 1)))
+                    (S.Mul
+                        (S.Var "n")
+                        (S.App (S.Var "f")
+                               (S.Add (S.Var "n") (S.Literal (S.LInt (-1))))
+                        )
+                    )
+                    (S.Literal (S.LInt 1))
+                )
+            )
 
-    runAll [add, mul, conditionalIf, caseStatement]
+    let fact const =
+            S.App (S.App combinator factorial) (S.Literal (S.LInt const))
+
+    runAll [add, mul, conditionalIf, caseStatement, fact 1, fact 2, fact 3]
