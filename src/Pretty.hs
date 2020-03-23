@@ -6,6 +6,9 @@ where
 
 import           LambdaSyntax
 
+{-|
+  Pretty print lambda expression
+|-}
 pretty :: Lambda -> String
 pretty expr = case expr of
   (Var     name)     -> name
@@ -29,6 +32,9 @@ pretty expr = case expr of
 
   (Abs name expr) -> "(" ++ "λ" ++ name ++ "." ++ pretty expr ++ ")"
 
+{-|
+  Pretty print lambda expression, in de Bruijn notation
+|-}
 prettyDeBruijn :: DeBruijnLambda -> String
 prettyDeBruijn expr = case expr of
   (DVar     name) -> show name

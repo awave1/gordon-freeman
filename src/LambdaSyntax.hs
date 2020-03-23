@@ -2,6 +2,9 @@ module LambdaSyntax where
 
 type Name = String
 
+{-|
+  Data type for extended lambda calculus
+|-}
 data Lambda
   = Var String
   | Literal Literal
@@ -17,6 +20,9 @@ data Lambda
   | Fix Lambda
   deriving (Show, Eq)
 
+{-|
+  Data type for extended lambda calculus, to be able to represent it in de Bruijn notation
+|-}
 data DeBruijnLambda
   = DVar Int
   | DLiteral Literal

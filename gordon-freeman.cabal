@@ -4,15 +4,15 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: bbcf5446231e16508a8188c893163be0512b300bd3c9998f9eba0f427cb5c091
+-- hash: d61f8b62de4ff4000706ee0b7bc8d5339cbe3a45fb6e282c0da3ba9142565c87
 
 name:           gordon-freeman
 version:        0.1.0.0
 description:    Please see the README on GitHub at <https://github.com/githubuser/gordon-freeman#readme>
-homepage:       https://github.com/githubuser/gordon-freeman#readme
-bug-reports:    https://github.com/githubuser/gordon-freeman/issues
-author:         Author name here
-maintainer:     example@example.com
+homepage:       https://github.com/awave1/gordon-freeman#readme
+bug-reports:    https://github.com/awave1/gordon-freeman/issues
+author:         Artem Golovin
+maintainer:     artgolovin96@gmail.com
 copyright:      2020 Author name here
 license:        BSD3
 license-file:   LICENSE
@@ -23,14 +23,13 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/gordon-freeman
+  location: https://github.com/awave1/gordon-freeman
 
 library
   exposed-modules:
       DeBruijnConversion
       LambdaSyntax
       Lib
-      Parser
       Pretty
       SECD
   other-modules:
@@ -42,7 +41,6 @@ library
     , base >=4.7 && <5
     , containers
     , mtl
-    , parsec
     , text
   default-language: Haskell2010
 
@@ -59,7 +57,6 @@ executable gordon-freeman-exe
     , containers
     , gordon-freeman
     , mtl
-    , parsec
     , text
   default-language: Haskell2010
 
@@ -77,6 +74,5 @@ test-suite gordon-freeman-test
     , containers
     , gordon-freeman
     , mtl
-    , parsec
     , text
   default-language: Haskell2010
