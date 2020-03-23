@@ -18,8 +18,6 @@ debruijnConvert = debruijnIndex []
   Build De Bruijn indices using a "stack" array
   Insert each name from the lambda expression at the beginning of the stack
   Get the index of that element and make it a var name
-
-  TODO: Replace defaulting to -1 with "Either" structure
 |-}
 debruijnIndex :: [String] -> Lambda -> DeBruijnLambda
 debruijnIndex nameStack e = case e of
