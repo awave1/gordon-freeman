@@ -8,12 +8,23 @@ import           System.Environment
 import           Data.Either
 import qualified Data.Text                     as T
 import qualified Data.Text.IO                  as T
+import           Control.Monad.State.Lazy
 
 
 import           Pretty
 import           DeBruijnConversion
 import qualified LambdaSyntax                  as S
 import           SECD
+import           TypeInference
+
+typeInference :: IO ()
+typeInference = do
+    let identity = S.Abs "x" (S.Var "x")
+    let res      = getType identity
+
+    case res of
+        Left  eq  -> print eq
+        Right err -> putStrLn err
 
 runAll :: [S.Lambda] -> IO ()
 runAll []         = putStrLn "done!"
