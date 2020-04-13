@@ -26,8 +26,6 @@ buildTypeEquation expr = case expr of
       Just p  -> return $ Left $ Equation (TVar (show q), p)
       Nothing -> return $ Right $ "Undeclared variable: " ++ x
 
-    return $ Right "o"
-
   L.Abs s t -> do
     (context, n, q) <- get
     let x = succ n
