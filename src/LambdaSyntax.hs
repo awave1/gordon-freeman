@@ -1,5 +1,6 @@
 module LambdaSyntax where
 
+
 type Name = String
 
 {-|
@@ -19,7 +20,7 @@ data Lambda
   | If Lambda Lambda Lambda -- main control flow, if
   | Case Lambda Lambda Lambda
   | Fix Lambda
-  deriving (Show, Eq)
+  deriving (Eq)
 
 {-|
   Data type for extended lambda calculus, to be able to represent it in de Bruijn notation
@@ -39,9 +40,9 @@ data DeBruijnLambda
   | DIf DeBruijnLambda DeBruijnLambda DeBruijnLambda -- main control flow, if
   | DCase DeBruijnLambda DeBruijnLambda DeBruijnLambda
   | DFix DeBruijnLambda
-  deriving (Show, Eq)
+  deriving (Eq)
 
 data Literal
   = LInt Int
   | LBool Bool
-  deriving (Show, Eq, Ord)
+  deriving (Eq, Ord)

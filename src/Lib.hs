@@ -11,29 +11,40 @@ import qualified Data.Text.IO                  as T
 import           Control.Monad.State.Lazy
 
 
-import           Pretty
+-- import           Pretty
 import           DeBruijnConversion
 import qualified LambdaSyntax                  as S
 import           SECD
 import           TypeInference
+import           Type
 
 typeInference :: IO ()
 typeInference = do
     let identity = S.Abs "x" (S.Var "x")
-    let res      = getType identity
+    let idRes    = getTypeEquation identity
+    case idRes of
+        Right eq -> do
+            print eq
+            print $ getTypeVarsInEquation eq
+        Left err -> putStrLn err
 
-    case res of
-        Left  eq  -> print eq
-        Right err -> putStrLn err
+    let app    = S.App identity identity
+    let appRes = getTypeEquation app
+    case appRes of
+        Right eq -> do
+            print eq
+            print $ getTypeVarsInEquation eq
+        Left err -> putStrLn err
+
 
 runAll :: [S.Lambda] -> IO ()
 runAll []         = putStrLn "done!"
 runAll (e : exps) = do
     print e
-    putStrLn $ "original: " ++ pretty e
+    putStrLn $ "original: " ++ show e
     putStr "De Bruijn: "
     let deBruijn = debruijnConvert e
-    (T.putStrLn . T.pack . prettyDeBruijn) deBruijn
+    (T.putStrLn . T.pack . show) deBruijn
     let secdCode = compile deBruijn
     putStr "SECD: "
     print secdCode

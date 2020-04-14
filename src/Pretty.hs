@@ -6,6 +6,15 @@ where
 
 import           LambdaSyntax
 
+instance Show Lambda where
+  show = pretty
+
+instance Show DeBruijnLambda where
+  show = prettyDeBruijn
+
+instance Show Literal where
+  show = showLit
+
 {-|
   Pretty print lambda expression
 |-}
