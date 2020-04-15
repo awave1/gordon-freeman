@@ -42,6 +42,8 @@ pretty expr = case expr of
 
   (Abs name expr) -> "(" ++ "λ" ++ name ++ "." ++ pretty expr ++ ")"
 
+  Zero            -> "Zero"
+
 {-|
   Pretty print lambda expression, in de Bruijn notation
 |-}

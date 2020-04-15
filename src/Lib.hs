@@ -1,5 +1,6 @@
 module Lib
     ( runSECD
+    , runTypeInference
     )
 where
 
@@ -18,23 +19,33 @@ import           SECD
 import           TypeInference
 import           Type
 
-typeInference :: IO ()
-typeInference = do
-    let identity = S.Abs "x" (S.Var "x")
-    let idRes    = getTypeEquation identity
-    case idRes of
-        Right eq -> do
-            print eq
-            print $ getTypeVarsInEquation eq
+typeInference :: S.Lambda -> IO ()
+typeInference expr = do
+    let type_ = infer expr
+    case type_ of
+        Right t -> do
+            putStr $ show expr
+            putStr " :: "
+            print t
+
         Left err -> putStrLn err
 
-    let app    = S.App identity identity
-    let appRes = getTypeEquation app
-    case appRes of
-        Right eq -> do
-            print eq
-            print $ getTypeVarsInEquation eq
-        Left err -> putStrLn err
+testTypeInference :: [S.Lambda] -> IO ()
+testTypeInference []             = putStrLn ""
+testTypeInference (expr : exprs) = do
+    typeInference expr
+    testTypeInference exprs
+
+runTypeInference :: IO ()
+runTypeInference = do
+
+    let identityExpr = S.Abs "x" (S.Var "x")
+    let appExpr      = S.App identityExpr S.Zero
+    let appExpr2     = S.App identityExpr identityExpr
+
+    let exprs        = [identityExpr, appExpr, appExpr2]
+
+    testTypeInference exprs
 
 
 runAll :: [S.Lambda] -> IO ()

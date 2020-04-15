@@ -20,6 +20,9 @@ data Lambda
   | If Lambda Lambda Lambda -- main control flow, if
   | Case Lambda Lambda Lambda
   | Fix Lambda
+  | Zero
+  | Succ
+  | Unit
   deriving (Eq)
 
 {-|

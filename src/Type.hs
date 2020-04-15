@@ -8,6 +8,7 @@ data Type = TVar String
           | TList Type Type
           | TNat
           | TInt
+          | TZero
           | TBool
           | TUnit
           | TConst String

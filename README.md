@@ -1,8 +1,4 @@
-# gordon-freeman
-
-> λ-calulus evaluator
->
-> Implemetation of modern SECD Machine
+# Simply Typed λ-calulus
 
 ## Install
 

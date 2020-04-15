@@ -3,24 +3,21 @@ module TypeInference where
 import           Type
 import           Pretty
 import qualified LambdaSyntax                  as L
+
 import           Control.Monad.State.Lazy
+
+import           Data.Foldable                  ( toList )
+import           Data.Set                       ( Set )
+import qualified Data.Set                      as Set
+import           Data.Either
+import           Data.List
 import           Data.Map                       ( Map )
 import qualified Data.Map                      as Map
 import qualified Data.Text                     as T
 import qualified Data.Text.IO                  as T
 
-
-
--- 1. var names mapped to its type
--- 2. counter
--- 3. equations found
-
--- type Context = ([(String, Type)], Int, Int)
 type Context = ([(String, Type)], Int, Int)
 
-{-|
-  TODO
-|-}
 buildTypeEquation :: L.Lambda -> State Context (Either String TypeEq)
 buildTypeEquation expr = case expr of
   L.Var x -> do
@@ -94,62 +91,120 @@ buildTypeEquation expr = case expr of
       L.LInt  _ -> return $ Right $ Equation (TVar $ show q, TInt)
       L.LBool _ -> return $ Right $ Equation (TVar $ show q, TBool)
 
+  L.Zero -> do
+    (_, _, q) <- get
+    return $ Right $ Equation (TVar $ show q, TNat)
+
 getTypeEquation :: L.Lambda -> Either String TypeEq
 getTypeEquation e = evalState (buildTypeEquation e) ([], 0, 0)
 
-getTypeVars :: Type -> [String]
-getTypeVars t = case t of
-  TVar v   -> [v]
-  TFun v f -> getTypeVars v ++ getTypeVars f
+getTypeEquationUnsafe :: L.Lambda -> TypeEq
+getTypeEquationUnsafe e =
+  fromRight (Exists [] []) $ evalState (buildTypeEquation e) ([], 0, 0)
 
 getTypeVarsInEquation :: TypeEq -> [String]
 getTypeVarsInEquation eq = case eq of
   Equation (_, t2) -> getTypeVars t2
   Exists _ eqs     -> concatMap getTypeVarsInEquation eqs
+ where
+  -- getTypeVars :: Type -> [String]
+  getTypeVars t = case t of
+    TVar v   -> [v]
+    TFun v f -> getTypeVars v ++ getTypeVars f
+    _        -> [show t]
+
+getBoundVars :: TypeEq -> [String]
+getBoundVars eq = case eq of
+  Equation (TVar s, _) -> [s]
+  Exists _ eqs         -> concatMap getBoundVars eqs
+
+flattenEq :: TypeEq -> TypeEq
+flattenEq eq = Exists (getExistentialVars eq) (getAllEquations eq)
+
+getExistentialVars :: TypeEq -> [String]
+getExistentialVars eq = case eq of
+  Exists vars eqs -> vars ++ concatMap getExistentialVars eqs
+  Equation t      -> []
+
+getAllEquations :: TypeEq -> [TypeEq]
+getAllEquations eq = case eq of
+  Exists vars eqs -> concatMap getAllEquations eqs
+  Equation e      -> [Equation e]
 
 {-|
-  TODO: docs
+  get variables that can be eliminated
 |-}
-check :: String -> Type -> Either String [(String, Type)]
-check x t
-  | t == TVar x = Left []
-  | x `elem` getTypeVars t = Left
-    ("occurs check failed: " ++ x ++ " = " ++ show t)
-  | otherwise = Right [(x, t)]
+getEliminatable :: TypeEq -> [String]
+getEliminatable typeEq =
+  getExistentialVars typeEq `intersect` getBoundVars typeEq
 
-unify :: Type -> Type -> [(String, Type)] -> Either String [(String, Type)]
-unify t1 t2 result = case (t1, t2) of
-  (TVar v, anyType) -> case check v anyType of
-    Right sub -> Right $ sub ++ result
-    Left  err -> Left err
+{-
+  Builds a map with variables that can be eliminated
+-}
+buildEliminatableMap :: TypeEq -> Map String [Type]
+buildEliminatableMap typeEq = combineBinded' (getAllEquations typeEq)
+                                             (initMap typeEq)
+ where
+  -- initMap :: TypeEq -> Map String [a]
+  initMap typeEq = Map.fromList $ zip
+    (getEliminatable typeEq)
+    (replicate (length $ getEliminatable typeEq) [])
 
-  (anyType, TVar v) -> case check v anyType of
-    Right sub -> Right $ sub ++ result
-    Left  err -> Left err
+  -- combineBinded' :: [TypeEq] -> Map String [TypeEq] -> Map String [TypeEq]
+  combineBinded' [] resMap = resMap
+  combineBinded' (Equation (TVar leftV, r) : equations) resMap =
+    case resMap Map.!? leftV of
+      Just list ->
+        combineBinded' equations $ Map.insert leftV (r : list) resMap
+      Nothing -> combineBinded' equations resMap
 
-  (TFun v1 f1, TFun v2 f2) -> unify v1 v2 result >>= unify f1 f2 -- "Sequentially compose two actions, passing any value produced by the first as an argument to the second."
+{-|
+  Replace variables in equation
+|-}
+replaceInEquations :: [TypeEq] -> Map String [Type] -> [TypeEq]
+replaceInEquations []         _ = []
+replaceInEquations (eq : eqs) m = case eq of
+  Equation (left, right) ->
+    Equation (left, replaceType right m) : replaceInEquations eqs m
 
-solveTypeEquation :: TypeEq -> Either String Type
-solveTypeEquation typeEq = case typeEq of
-  Equation (left, right) -> case (left, right) of
-    (TVar l, TVar r) -> undefined
-  Exists vars equations -> undefined
+{-|
+  Replaces a variable in a type
+|-}
+replaceType :: Type -> Map String [Type] -> Type
+replaceType t m = case t of
+  TVar v -> case m Map.!? v of
+    Just ts -> head ts
+    Nothing -> TVar v
+  TFun v f ->
+    TFun (replaceType v $ replaceInMap m) (replaceType f $ replaceInMap m)
+  _ -> t
+ where
+  -- replaceInMap :: Map String [Type] -> Map String [Type]
+  replaceInMap m = replaceInMap' m (Map.keys m)
+  replaceInMap' m []         = m
+  replaceInMap' m (k : keys) = do
+    let newMap = Map.insert k (map (`replaceType` m) $ m Map.! k) m
+    replaceInMap' newMap keys
+
+
+{-|
+  Solves the type equation
+|-}
+solve :: TypeEq -> TypeEq
+solve typeEq = Exists (vars \\ getEliminatable flattenedTypeEq)
+                      (replaceInEquations equations eliminatableMap)
+ where
+  flattenedTypeEq         = flattenEq typeEq
+  (Exists vars equations) = flattenedTypeEq
+  eliminatableMap         = buildEliminatableMap flattenedTypeEq
 
 {-|
   TODO
 |-}
 infer :: L.Lambda -> Either String Type
 infer expr = case getTypeEquation expr of
-  Right eq -> case solveTypeEquation eq of
-    Right inferredType -> Right inferredType
-    Left err ->
-      Left
-        $  "failed to solve type equation `"
-        ++ show eq
-        ++ "` for expression `"
-        ++ show expr
-        ++ "`.\nreason: "
-        ++ err
+  Right eq -> case solve eq of
+    Exists _ (Equation (_, t) : rest) -> Right t
   Left err ->
     Left
       $  "type inference failed for expression `"
